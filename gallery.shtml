@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>untitled</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js" type="text/javascript"></script>
+</head>
+<body>
+<script>
+
+simpleGalery  = {
+	// configuration
+	api_key: "a22b1a90b000578e1854ebdb3a3b5ba7",
+	photoset_id: "72157625123518541",
+	per_page:4,
+	// do not touch in these ones
+	atualPg:1, 
+	limite: 0,
+	firstLoad : false,
+	
+	template:	"<li class=>"+
+				"<a onclick=\"javascript:mg.showBigImage('[link]')\" class=\"thumb\" >"+
+				"<img src=\"[photo]\" border=\"0\" />"+
+				"</a>"+
+				"</li>",
+	init:function(){
+		simpleGalery.firstLoad = true;
+		simpleGalery.getImage(1);		
+	},
+	getImage: function(pg){
+		$.getJSON("http://api.flickr.com/services/rest/?format=json&jsoncallback=?&api_key="+this.api_key+"&method=flickr.photosets.getPhotos&photoset_id="+this.photoset_id+"&per_page="+this.per_page+"&page="+pg+"&size="+this.size,
+			function(data){
+				album = data.photoset;
+				if (data.stat == "fail") return false;
+				photos = album.photo;
+				mg.limite = album.total;
+
+				temp = this.template;
+				cont = "";
+				$.each(photos,function(){
+					el = 'http://farm'+this['farm']+'.static.flickr.com/'+this['server']+'/'+this['id']+'_'+this['secret'];
+					imgT = el +'_t.jpg';
+					imgLinkg = el +'.jpg';
+					elem = mg.template	.replace(/\[photo\]/g, imgT)
+										.replace(/\[link\]/g, imgLinkg);
+					cont += elem;
+				});
+				$("#ilustras")	.html(cont)
+								.fadeIn();
+				if(simpleGalery.firstLoad) $(".thumb:first").trigger("click");
+				simpleGalery.firstLoad = false;
+				
+			});	
+	},
+	goUp: function(){
+		m = Math.ceil(mg.limite / mg.per_page);
+		a = mg.atualPg;
+		if(m > a) {
+			$("#ilustras").hide();
+			mg.atualPg++;	
+			mg.getImage(mg.atualPg);
+		}
+	},
+	goDown: function(){
+	
+		a = mg.atualPg;
+		if(a > 1) {
+			$("#ilustras").hide();
+			mg.atualPg--;	
+			mg.getImage(mg.atualPg);
+		}
+		
+	},
+	showBigImage: function(data){
+		imgG = "<img src=\""+ data +"\" border=\"0\" />";
+		$("#ilustrasG").html(imgG);
+		
+	}
+	
+}
+mg = simpleGalery;
+$().ready(
+	function(){
+		mg.init(1);
+	}
+)
+</script>
+<style>
+.ilustras li{float:left; display:block;margin:0 5px; }
+.ilustras a{width: 100px; height:100px;text-align: center;display: table-cell; vertical-align: middle}
+.ilustras img{margin: auto; border:1px solid #fff}
+
+</style>
+<a href="javascript:mg.goDown()">volta</a>
+<a href="javascript:mg.goUp()">vai</a><br>
+<ul id="ilustras" class="ilustras"></ul><br>
+<div class="goFlickr"> Veja todas no <a href="http://www.flickr.com/photos/dvespa/sets/72157625123518541/">Flickr</a></div><br>
+<div id="ilustrasG" class="ilustrasG"></div>
+</body>
+</html>
