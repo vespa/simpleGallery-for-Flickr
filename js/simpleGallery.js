@@ -76,7 +76,7 @@ simpleGalery  = {
 	}
 	
 }
-mg = simpleGalery;
+var mg = simpleGalery;
 
 $().ready(
 	function(){
